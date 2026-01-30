@@ -94,7 +94,7 @@ const uint16_t SENSOR_SAMPLE_MS = 15; // ~66 Hz
 const uint16_t SENSOR_PRINT_MS = 250; // debug rate
 const uint16_t ANIM_MIN_HOLD_MS = 1200;
 const uint32_t IDLE_TIMEOUT_MS = 30000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
-const uint32_t IDLE_CYCLE_MS = 60000;   // 60000 - change idel pattern every minute
+const uint32_t IDLE_CYCLE_MS = 60000;   // 60000 - change idle pattern every minute
 
 const uint8_t TARGET_FPS = 60;
 const uint16_t FRAME_MS = (1000 / TARGET_FPS);
@@ -155,9 +155,6 @@ const char *ANIM_NAME[22] = {
     "21 rainbow bloom",
 };
 
-// -------------------------
-// Epoch reset system
-// -------------------------
 static uint32_t gAnimEpoch = 1;
 
 #define ANIM_EPOCH_GUARD()      \
@@ -353,7 +350,7 @@ static uint32_t captureStartMs = 0;
 static float captureSum = 0.0f;
 static uint16_t captureCount = 0;
 static bool animLocked = false;
-static uint8_t lockedAnimation = 12;
+static uint8_t lockedAnimation = 21;
 
 static void updateModeAndAnimation()
 {
@@ -380,7 +377,7 @@ static void updateModeAndAnimation()
         idleMode = false;
         lastAnimChangeMs = nowMs;
 
-        currentAnimation = animLocked ? lockedAnimation : 12;
+        currentAnimation = animLocked ? lockedAnimation : 21;
 
         Serial.print("ANIM (idle exit) -> ");
         Serial.print((int)currentAnimation);
@@ -455,7 +452,7 @@ static void updateModeAndAnimation()
     if (animLocked)
         currentAnimation = lockedAnimation;
     else
-        currentAnimation = 12;
+        currentAnimation = 21;
 
     prevTouched = gsr.touched;
 }

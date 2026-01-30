@@ -125,9 +125,9 @@ static uint32_t lastAnimMs = 0;
 static float dtSec = 0.0f;
 static float tSec = 0.0f;
 
-const uint16_t SENSOR_SAMPLE_MS = 15;  // ~66 Hz
-const uint32_t IDLE_TIMEOUT_MS = 1000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
-const uint32_t IDLE_CYCLE_MS = 15000;  // 60000 - change idel pattern every minute
+const uint16_t SENSOR_SAMPLE_MS = 15;   // ~66 Hz
+const uint32_t IDLE_TIMEOUT_MS = 30000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
+const uint32_t IDLE_CYCLE_MS = 60000;   // 60000 - change idle pattern every minute
 
 struct GsrState
 {
