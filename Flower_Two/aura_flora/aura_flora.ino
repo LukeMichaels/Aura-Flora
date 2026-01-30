@@ -125,9 +125,9 @@ static uint32_t lastAnimMs = 0;
 static float dtSec = 0.0f;
 static float tSec = 0.0f;
 
-const uint16_t SENSOR_SAMPLE_MS = 15;   // ~66 Hz
-const uint32_t IDLE_TIMEOUT_MS = 30000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
-const uint32_t IDLE_CYCLE_MS = 60000;   // 60000 - change idle pattern every minute
+const uint16_t SENSOR_SAMPLE_MS = 15;  // ~66 Hz
+const uint32_t IDLE_TIMEOUT_MS = 1000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
+const uint32_t IDLE_CYCLE_MS = 5000;   // 60000 - change idle pattern every minute
 
 struct GsrState
 {
@@ -644,19 +644,18 @@ void animationTwo()
     float d = constrain(gsr.delta, 0.0f, 160.0f);
     float boost = mapf(d, 0, 160, 0.9f, 1.25f);
 
+    uint8_t baseHuePetal = 160 + (uint8_t)(18.0f * sinf(phase * 0.55f));
+    uint8_t baseHueBud = 192 + (uint8_t)(10.0f * sinf(phase * 0.35f));
+
     // Stem
     for (int i = 0; i < STEM_LEDS; i++)
     {
-        float u = stemIsLeaf[i] ? leafPhaseCoordForStemIndex(i) : trunkPhaseCoordForStemIndex(i);
-        float dist = fabsf(u) * 14.0f;
+        float dist = fu16(ledR16[i]);
 
         float w = sinf(dist * 1.15f - phase * boost);
         uint8_t bri = (uint8_t)constrain(140.0f + 115.0f * w, 0.0f, 255.0f);
 
-        // leaf segments get a small hue offset so they don't clone the trunk
-        uint8_t seg = stemIsLeaf[i] ? (uint8_t)max(0, stemLeafSegId[i]) : 0;
-        uint8_t hue = 160 + (uint8_t)(18.0f * sinf(phase * 0.55f)) + (uint8_t)(dist * 2.0f) + seg * 12;
-
+        uint8_t hue = baseHuePetal;
         leds[i] = CHSV(hue, 210, bri);
     }
 
@@ -670,7 +669,7 @@ void animationTwo()
 
             float w = sinf(dist * 1.15f - phase * boost);
             uint8_t bri = (uint8_t)constrain(140.0f + 115.0f * w, 0.0f, 255.0f);
-            uint8_t hue = 160 + (uint8_t)(18.0f * sinf(phase * 0.55f)) + (uint8_t)(petal * 3);
+            uint8_t hue = baseHuePetal + (uint8_t)(petal * 3);
 
             leds[idx++] = CHSV(hue, 200, bri);
         }
@@ -683,7 +682,7 @@ void animationTwo()
 
         float w = sinf(dist * 1.15f - phase * boost);
         uint8_t bri = (uint8_t)constrain(140.0f + 115.0f * w, 0.0f, 255.0f);
-        uint8_t hue = 192 + (uint8_t)(10.0f * sinf(phase * 0.35f)) + (uint8_t)(dist * 4.0f);
+        uint8_t hue = baseHueBud + (uint8_t)(dist * 4.0f);
 
         leds[idx++] = CHSV(hue, 160, bri);
     }
@@ -1087,8 +1086,8 @@ void animationThirteen()
         zf = 0.0f;
     }
 
-    const float Z_SCROLL_SPEED = 18.0f;
-    const float HUE_DRIFT_SPEED = 3.0f;
+    const float Z_SCROLL_SPEED = 12.0f;
+    const float HUE_DRIFT_SPEED = 2.0f;
 
     zf += dtSec * Z_SCROLL_SPEED;
 
@@ -1166,8 +1165,7 @@ void animationFifteen()
         time = 0.0f;
     }
 
-    // Convert time into an 8-bit phase (keeps trig fast via sin8)
-    uint8_t t8 = (uint8_t)(time * 40.0f); // speed knob
+    uint8_t t8 = (uint8_t)(time * 28.0f); // speed knob
 
     for (int i = 0; i < NUM_LEDS; i++)
     {
@@ -1185,7 +1183,7 @@ void animationFifteen()
     }
 
     hueShift += 1;
-    time += 0.05f;
+    time += 0.03f;
 
     gFrameDirty = true;
 }
@@ -1205,20 +1203,20 @@ void animationEighteen()
 
     int idx = 0;
 
+    float scale = 0.10f;
+
     // Stem
     for (int i = 0; i < STEM_LEDS; i++)
     {
-        float u = stemIsLeaf[i] ? leafPhaseCoordForStemIndex(i) : trunkPhaseCoordForStemIndex(i);
-        float x = (-u) * 6.0f; // frequency on stem
+        float x = fx(ledX16[i]) * scale;
+        float y = fx(ledY16[i]) * scale;
 
-        uint8_t seg = stemIsLeaf[i] ? (uint8_t)max(0, stemLeafSegId[i]) : 0;
-        uint8_t hue = (uint8_t)(128 + 127 * sinf(x + phase + seg * 0.35f));
+        float dist = sqrtf(x * x + y * y);
+        uint8_t hue = (uint8_t)(128 + 127 * sinf(dist + phase));
         leds[idx++] = CHSV(hue, 255, 255);
     }
 
     // Petals / Bud
-    float scale = 0.10f;
-
     float cx = LEDS_PER_PETAL / 2.0f;
     float cy = PETALS / 2.0f;
 
