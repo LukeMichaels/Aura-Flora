@@ -125,9 +125,9 @@ static uint32_t lastAnimMs = 0;
 static float dtSec = 0.0f;
 static float tSec = 0.0f;
 
-const uint16_t SENSOR_SAMPLE_MS = 15;  // ~66 Hz
-const uint32_t IDLE_TIMEOUT_MS = 1000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
-const uint32_t IDLE_CYCLE_MS = 5000;   // 60000 - change idle pattern every minute
+const uint16_t SENSOR_SAMPLE_MS = 15;   // ~66 Hz
+const uint32_t IDLE_TIMEOUT_MS = 30000; // 30000 - if the sensor isn't used for 30 seconds, rotate through patterns
+const uint32_t IDLE_CYCLE_MS = 60000;   // 60000 - change idle pattern every minute
 
 struct GsrState
 {
@@ -563,10 +563,12 @@ void setup()
     Serial.begin(115200);
 
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(120);
 
-    // Power safety: tune this to PSU capability.
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 3000);
+    // brightness can go up to 255
+    FastLED.setBrightness(250);
+
+    // Power safety: tune this to PSU capability
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 20000);
 
     buildLedCoords();
     buildStemMap();
@@ -608,14 +610,22 @@ void loop()
         memset(gPrevFrame, 0, sizeof(gPrevFrame));
         memset(gScratchU8A, 0, sizeof(gScratchU8A));
 
-        gFrameDirty = true; // force a show on mode change
+        gFrameDirty = true;
     }
 
-    // Only show when something actually updated this loop
     gFrameDirty = false;
     runAnimation(currentAnimation);
+
     if (gFrameDirty)
+    {
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i].r = qadd8(leds[i].r, scale8(leds[i].r, 80));
+            leds[i].g = qadd8(leds[i].g, scale8(leds[i].g, 80));
+            leds[i].b = qadd8(leds[i].b, scale8(leds[i].b, 80));
+        }
         FastLED.show();
+    }
 }
 
 #define NOISE_SCALE 25
