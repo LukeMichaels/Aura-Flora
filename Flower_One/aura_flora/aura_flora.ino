@@ -126,7 +126,7 @@ uint8_t currentAnimation = 1;
 uint32_t lastAnimChangeMs = 0;
 uint32_t lastIdleCycleMs = 0;
 bool idleMode = false;
-const uint8_t IDLE_PLAYLIST[] = {1, 20, 2, 3, 4, 5, 21, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+const uint8_t IDLE_PLAYLIST[] = {1, 20, 2, 3, 4, 5, 21, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
 const uint8_t IDLE_PLAYLIST_LEN = sizeof(IDLE_PLAYLIST) / sizeof(IDLE_PLAYLIST[0]);
 uint8_t idleIndex = 0;
 
@@ -279,10 +279,10 @@ static uint8_t chooseAnimationFromDelta(float d)
         return 2;
     if (d < 64)
         return 3;
-    if (d < 72)
-        return 7;
     if (d < 80)
-        return 9;
+        return 7;
+    // if (d < 80)
+    //     return 9;
     if (d < 90)
         return 11;
     if (d < 100)
@@ -495,7 +495,9 @@ void animationTwentyOne();
 void setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(120);
+    
+    // brightness can go up to 255
+    FastLED.setBrightness(250);
 
     Serial.begin(115200);
 
